@@ -1,0 +1,83 @@
+Climate Conference Analysis
+Database: https://www.db-fiddle.com/f/pxMci1sLL945KHKYvpe9W6/1
+
+This project analyses a database of 30 VIPs attending a climate conference. Using SQL queries, I explored their event participation, hotel reservations, feedback exchanges, and RSVPs, applying joins, subqueries, and filtering to answer key questions.
+
+
+-- Question 1: Which VIPs are presenting and what events are they linked to? [LEFT JOIN]
+
+SELECT v.first_name
+, v.last_name
+, e.event_name
+FROM vips v
+LEFT JOIN events e
+ON v.event = e.event_id
+;
+
+
+-- Question 2: Which VIPs are staying in a hotel, and what are the hotel names? [INNER JOIN]
+
+SELECT v.first_name
+, v.last_name
+, h.hotel_name
+FROM vips v
+INNER JOIN reservations r
+    ON v.member_id = r.member_id
+INNER JOIN hotels h
+    ON r.hotel = h.hotel_id
+;
+
+
+-- Question 3: Show all VIPs, their event type, and the hotel they’re staying at. [MULTIPLE JOINs]
+
+SELECT v.first_name
+, v.last_name
+, e.event_name
+, e.event_type
+, h.hotel_name
+FROM vips v
+INNER JOIN events e
+    ON v.event = e.event_id
+INNER JOIN reservations r
+    ON v.member_id = r.member_id
+INNER JOIN hotels h
+    ON r.hotel = h.hotel_id
+;
+
+
+-- Question 4: Match each VIP with the person they are providing feedback to. [SELF JOIN]
+
+SELECT v1.first_name AS vip_first
+, v1.last_name AS vip_last
+, v2.first_name AS feedback_first
+, v2.last_name AS feedback_last
+FROM vips v1
+INNER JOIN vips v2
+    ON v1.provides_feedback_to = v2.member_id
+;
+
+
+-- Question 5: Which VIPs joined before the average membership year? [SUBQUERY]
+
+SELECT first_name
+, last_name
+, member_since
+FROM vips
+WHERE member_since < (
+    SELECT AVG(member_since) 
+    FROM vips
+)
+;
+
+
+-- Question 6: Which VIPs RSVP’d “yes” to both the welcome party and dinner? [CHOICE]
+
+SELECT v.first_name
+, v.last_name
+FROM vips v
+INNER JOIN reservations r
+    ON v.member_id = r.member_id
+WHERE r.welcome_rsvp = 1 
+  AND r.dinner_rsvp = 1
+;
+
